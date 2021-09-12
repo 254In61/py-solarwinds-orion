@@ -36,6 +36,8 @@
          
     - debug:
         var: query_result
+    # Sample output : {'results': [{'IPAddress': '172.18.9.16', 'Caption': 'mgt-r01', 'Uri': 'swis://ZXPRT01.labsetup.infra.local/Orion/Orion.Nodes/NodeID=18929'}]}
+    # Of interest is the 'Uri' key value.
     
     # Perfom CRUD fuction with the device node details obtained
     - name: DELETE from solarwinds database"
