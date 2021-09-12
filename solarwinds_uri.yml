@@ -1,0 +1,51 @@
+---
+# Ansible script to interract with Solarwinds Orion server
+# Author : Allan D.M Maseghe
+# Contacts: https://www.linkedin.com/in/allan-m-2a955931/
+
+
+# This script works with IPV4 addresses in the inventory list
+
+- name: Transition out of devices
+  hosts: device_group
+  gather_facts: false
+
+  vars:
+    swinds_base_url: https://{{ your server IP or hostname }}:17778/SolarWinds/InformationService/v3/Json/
+  
+  tasks:
+    # 1st step is to perfom a SWQL Querry to obtain device node number uri
+    - name: Query Solarwinds server for host details"
+      uri:
+        url: "{{ swinds_base_url }}Query"
+        force_basic_auth: yes
+        validate_certs: no 
+        headers:
+          Accept: application/json
+          Content-Type: application/json
+        user: "{{ your username }}@{{ the domain name }}"
+        password: "{{ your password }}"
+        method: POST
+        body:
+          query: SELECT IPAddress, Caption, Uri FROM Orion.Nodes WHERE IPAddress = @ip_addr
+          parameters:
+            ip_addr: "{{ inventory_hostname }}"
+        body_format: json
+      register: query_result
+      delegate_to: localhost
+         
+    - debug:
+        var: query_result
+    
+    # Perfom CRUD fuction with the device node details obtained
+    - name: DELETE from solarwinds database"
+      uri:
+        url: "{{ swinds_base_url }}{{ query_result['json']['results'][0]['Uri'] }}" 
+        validate_certs: no 
+        method: DELETE
+        force_basic_auth: yes
+        user: "{{ your username }}@{{ the domain name }}"
+        password: "{{ your password }}"
+      register: delete_result
+      delegate_to: localhost
+...
